@@ -1,0 +1,49 @@
+<% include partials/header.ejs %>
+
+<div class="w-full min-h-screen bg-zinc-300 px-10 py-8">
+    <div>
+        <form action="/search" method="get" class="max-w-md mx-auto">
+            <div class="mb-4">
+                <label for="item" class="block text-gray-700 text-sm font-semibold mb-2">Search Bar:</label>
+                <input id="item" class="border-2 rounded-md w-full px-3 py-2 focus:outline-none focus:border-blue-500" type="text" name="username" placeholder="Enter your username">
+                <button class="bg-red-600 text-white rounded-full px-4 py-2 hover:bg-red-700 transition duration-300" type="submit">Search</button>
+            </div>
+        </form>
+    </div>
+    <div class="cards grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        <% posts.forEach(function(elem, index){ %>
+            <div class="w-72">
+                <div class="card mb-8 bg-white rounded-lg overflow-hidden shadow-md">
+                    <img class="w-full h-40 object-cover" src="/images/uploads/<%= elem.image %>" alt="<%= elem.title %>">
+                    <h4 class="p-7 text-gray-800 text-xl font-semibold truncate"><%= elem.title %></h4>
+                    <p class="p-7 text-gray-800"><%= elem.description %></p>
+                    <div>
+                        <h2>Latitude: <span style="color:red"><%= elem.latitude %></span></h2>
+                        <h2>Longitude: <span style="color:red"><%= elem.longitude %></span></h2>
+                    </div>
+                    <div id="map-<%= index %>" class="map-container" style="height: 200px;"></div>
+                </div>
+           
+                <form action="/profile/<%= elem.user._id %>" method="get">
+                    <button class="bg-red-600 text-white rounded-full px-4 py-2 hover:bg-red-900 transition duration-300" type="submit">I'm interested</button>
+                </form>
+
+                <button class="bg-green-600 text-white rounded-full px-4 py-2 hover:bg-green-900 transition duration-300" type="submit">Send Mail</button>
+            </div>
+        <% }) %>
+    </div>
+</div>
+
+<script>
+    <% posts.forEach(function(elem, index){ %>
+        const map<%= index %> = L.map('map-<%= index %>').setView([<%= elem.latitude %>, <%= elem.longitude %>], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map<%= index %>);
+        L.marker([<%= elem.latitude %>, <%= elem.longitude %>])
+            .addTo(map<%= index %>)
+            .bindPopup(`<b><%= elem.title %></b><br><%= elem.description %>`);
+    <% }) %>
+</script>
+
+<% include partials/footer.ejs %>
