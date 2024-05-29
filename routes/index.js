@@ -254,7 +254,6 @@ router.post('/fileupload', isLoggedIn, upload.single("image"), async function (r
   // console.log(user.profileImage);
   res.redirect("/profile/:userId");
 });
-
 router.post('/register', function (req, res, next) {
   const data = new userModel({
     username: req.body.username,
@@ -263,15 +262,21 @@ router.post('/register', function (req, res, next) {
     accountType: req.body.accountType,
     email: req.body.email,
     contact: req.body.contact
-  })
+  });
 
   userModel.register(data, req.body.password)
-    .then(function () {
-      passport.authenticate("local")(
-        req, res, function () {
-          res.redirect("/profile/:userId");
-        });
+    .then(function (user) {
+      passport.authenticate("local")(req, res, function () {
+        // Correctly get the user ID after authentication
+        const userId = req.user._id;
+        res.redirect(`/profile/${userId}`);
+      });
     })
+    .catch(function (err) {
+      // Handle errors
+      console.error(err);
+      res.status(500).send("Error registering new user.");
+    });
 });
 
 router.post('/login', passport.authenticate("local", {
